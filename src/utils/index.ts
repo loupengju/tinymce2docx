@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from 'lodash';
 import dayjs from "dayjs";
 import { parseDocument } from "htmlparser2";
 import { DataNode, Element } from "domhandler";
