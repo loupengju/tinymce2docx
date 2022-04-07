@@ -12,6 +12,7 @@
     "@types/react": "^17.0.43",
     "@types/react-dom": "^17.0.14",
     "dayjs": "^1.11.0",
+    "docx": "^7.3.0",
     "file-saver": "^2.0.5",
     "gogocode": "^1.0.52",
     "htmlparser2": "^6.1.0",
@@ -34,6 +35,17 @@
       "react-app/jest"
     ]
   },
+  "gitHooks": {
+    "pre-commit": "lint-staged"
+  },
+  "lint-staged": {
+    "*.{js,jsx,less,md,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "prettier --parser=typescript --write"
+    ]
+  },
   "browserslist": {
     "production": [
       ">0.2%",
@@ -47,6 +59,9 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.181"
+    "@types/file-saver": "^2.0.5",
+    "@types/lodash": "^4.14.181",
+    "lint-staged": "^12.3.7",
+    "prettier": "^2.6.2"
   }
 }
