@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { Editor } from "@tinymce/tinymce-react";
+import { Editor } from '@tinymce/tinymce-react';
 import './tinymce';
 import {genDocument} from './utils';
 
