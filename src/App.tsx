@@ -1,7 +1,7 @@
 import { useRef } from "react";
-import { Editor } from "@tinymce/tinymce-react";
+import { Editor } from '@tinymce/tinymce-react';
 import './tinymce';
-import {genDocument} from "./utils";
+import {genDocument} from './utils';
 
 export default function App() {
   const editorRef = useRef<any>(null);
