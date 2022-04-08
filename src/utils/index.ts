@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import dayjs from "dayjs";
-import { parseDocument } from "htmlparser2";
-import { DataNode, Element } from "domhandler";
-import { ElementType } from "domelementtype";
-import { DEFAULT_FONT_SIZE, D_TagStyleMap } from "../constants";
+import dayjs from 'dayjs';
+import { parseDocument } from 'htmlparser2';
+import { DataNode, Element } from 'domhandler';
+import { ElementType } from 'domelementtype';
+import { DEFAULT_FONT_SIZE, D_TagStyleMap } from '../constants';
 import {
   Document,
   Paragraph,
@@ -15,33 +15,47 @@ import {
   IRunOptions,
   IParagraphOptions,
   ExternalHyperlink,
-} from "docx";
-import { saveAs } from "file-saver";
+  UnderlineType,
+  convertInchesToTwip,
+  LevelFormat,
+} from 'docx';
+import { saveAs } from 'file-saver';
 
 type IHtmlTag = keyof typeof D_TagStyleMap;
 
 // 生成属性
-export const genAttrs = (attribs: { [name: string]: string }, attrs: { [name: string]: string }[]) => {
-  const omitAttr = _.omit(attribs, ["style"]);
+export const genAttrs = (
+  attribs: { [name: string]: string },
+  attrs: { [name: string]: string }[],
+) => {
+  const omitAttr = _.omit(attribs, ['style']);
   !_.isEmpty(omitAttr) && attrs.push(omitAttr);
   return attrs;
 };
 
 // 生成样式
-export const genStyles = (attribs: { [name: string]: string }, node: any, styles: string[]) => {
-  D_TagStyleMap[node.parent.name as IHtmlTag] && styles.push(D_TagStyleMap[node.parent.name as IHtmlTag]);
+export const genStyles = (
+  attribs: { [name: string]: string },
+  node: any,
+  styles: string[],
+) => {
+  D_TagStyleMap[node.parent.name as IHtmlTag] &&
+    styles.push(D_TagStyleMap[node.parent.name as IHtmlTag]);
   attribs?.style && styles.push(attribs?.style);
   return styles;
 };
 
 // 文本格式化
-export const buildText = (child: DataNode & Element, result: { elements: any[] }) => {
+export const buildText = (
+  child: DataNode & Element,
+  result: { elements: any[] },
+) => {
   const elementInfo = {
     type: ElementType.Text,
     text: child.data,
     attrs: genAttrs(child.attribs, []),
     styles: genStyles(child.attribs, child, []),
-    ..._.pick(child, ["name"]),
+    ..._.pick(child, ['name']),
   };
 
   let _child = child as any;
@@ -54,7 +68,10 @@ export const buildText = (child: DataNode & Element, result: { elements: any[] }
 };
 
 // a标签格式化
-export const buildATag = (child: DataNode & Element, result: { elements: any[] }) => {
+export const buildATag = (
+  child: DataNode & Element,
+  result: { elements: any[] },
+) => {
   const elementInfo = {
     type: ElementType.Text,
     // @ts-ignore
@@ -63,7 +80,7 @@ export const buildATag = (child: DataNode & Element, result: { elements: any[] }
     styles: genStyles(child.attribs, child, []),
     href: child.attribs?.href,
     title: child.attribs?.title,
-    ..._.pick(child, ["name"]),
+    ..._.pick(child, ['name']),
   };
 
   let _child = child as any;
@@ -77,16 +94,16 @@ export const buildATag = (child: DataNode & Element, result: { elements: any[] }
 
 // 递归所有node节点，找到text、a、image、table标签
 const walk = (child: DataNode & Element, result: { elements: any[] }) => {
-  if (child.name === "a") {
+  if (child.name === 'a') {
     // a标签
     buildATag(child, result);
-  } else if (child.type === ElementType.Text && child.name !== "a") {
+  } else if (child.type === ElementType.Text && child.name !== 'a') {
     // 文本类型
     buildText(child, result);
   }
 
   // 递归
-  if (child.children && child.children.length && !["a"].includes(child.name)) {
+  if (child.children && child.children.length && !['a'].includes(child.name)) {
     Array.from(child.children).forEach((i: any) => {
       walk(i, result);
     });
@@ -98,10 +115,10 @@ export const array2Style = (styles: string[]) => {
   const info: Record<string, string> = {};
   styles.forEach((c) => {
     // 转数组 "font-weight: bold; font-size: 36px; line-height: 1.5;".split(';')
-    const splitArr = c.split(";").filter(Boolean);
+    const splitArr = c.split(';').filter(Boolean);
     splitArr.forEach((_c) => {
-      const [key, value] = _c.split(":");
-      info[key.trim()] = value.replace(";", "").trim();
+      const [key, value] = _c.split(':');
+      info[key.trim()] = value.replace(';', '').trim();
     });
   });
 
@@ -110,16 +127,21 @@ export const array2Style = (styles: string[]) => {
 
 // style转格式 例如text-align、padding-left
 export const arr2ParagraphOptions = (elements: any): IParagraphOptions => {
-  const styles: any[] = elements.map((el: { styles: string[] }) => array2Style(el.styles)) ?? [];
+  const styles: any[] =
+    elements.map((el: { styles: string[] }) => array2Style(el.styles)) ?? [];
   const styleInfo = styles.reduce((a, b) => Object.assign(a, b), {});
 
   return {
     // 文字对齐方式
-    alignment: styleInfo["text-align"] ? styleInfo["text-align"] : [],
+    alignment: styleInfo['text-align'] ? styleInfo['text-align'] : [],
     // 段落间距
     indent: {
-      left: styleInfo["padding-left"] ? convertMillimetersToTwip(parseInt(styleInfo["padding-left"]) / 10) : 0,
-      right: styleInfo["padding-right"] ? convertMillimetersToTwip(parseInt(styleInfo["padding-right"]) / 10) : 0,
+      left: styleInfo['padding-left']
+        ? convertMillimetersToTwip(parseInt(styleInfo['padding-left']) / 10)
+        : 0,
+      right: styleInfo['padding-right']
+        ? convertMillimetersToTwip(parseInt(styleInfo['padding-right']) / 10)
+        : 0,
     },
     // readonly thematicBreak?: boolean;
     // readonly contextualSpacing?: boolean;
@@ -151,13 +173,26 @@ export const arr2ParagraphOptions = (elements: any): IParagraphOptions => {
 
 export const genDocxStyle = (info: Record<string, string>): IRunOptions => {
   return {
-    bold: info["font-weight"] === "bold",
-    italics: info["font-style"] === "italic",
-    color: info["color"],
-    size: info["font-size"] ? parseInt(info["font-size"]) : DEFAULT_FONT_SIZE,
+    bold: info['font-weight'] === 'bold',
+    italics: info['font-style'] === 'italic',
+    color: info['color'],
+    size: info['font-size'] ? parseInt(info['font-size']) : DEFAULT_FONT_SIZE,
     shading: {
-      fill: info["background-color"],
+      fill: info['background-color'],
     },
+    // 下标
+    subScript: !!info['subscript'],
+    // 上标
+    superScript: !!info['superscript'],
+    // 下划线
+    underline:
+      info['text-decoration'] === 'underline'
+        ? {
+            color: info['color'],
+            type: UnderlineType.SINGLE,
+          }
+        : undefined,
+    strike: info['text-decoration'] === 'line-through',
     //  italicsComplexScript: boolean;
     //  underline: {
     //      color: string;
@@ -191,7 +226,10 @@ export const genDocxStyle = (info: Record<string, string>): IRunOptions => {
  * @param html html字符串
  * @param name 下载的文件名
  */
-export const genDocument = (html: string, name = dayjs().format("YYYYMMDDHHmmss")) => {
+export const genDocument = (
+  html: string,
+  name = dayjs().format('YYYYMMDDHHmmss'),
+) => {
   const ast = parseDocument(html);
   const { children } = ast;
   const childrenResult = _.cloneDeep(children).map((c) => {
@@ -212,6 +250,67 @@ export const genDocument = (html: string, name = dayjs().format("YYYYMMDDHHmmss"
   };
 
   const doc = new Document({
+    numbering: {
+      config: [
+        {
+          levels: [
+            {
+              level: 0,
+              format: LevelFormat.UPPER_ROMAN,
+              text: '%1',
+              alignment: AlignmentType.START,
+              style: {
+                paragraph: {
+                  indent: {
+                    left: convertInchesToTwip(0.5),
+                    hanging: convertInchesToTwip(0.18),
+                  },
+                },
+              },
+            },
+          ],
+          reference: 'my-crazy-reference',
+        },
+        {
+          levels: [
+            {
+              level: 0,
+              format: LevelFormat.DECIMAL,
+              text: '%1',
+              alignment: AlignmentType.START,
+              style: {
+                paragraph: {
+                  indent: {
+                    left: convertInchesToTwip(0.5),
+                    hanging: convertInchesToTwip(0.18),
+                  },
+                },
+              },
+            },
+          ],
+          reference: 'my-number-numbering-reference',
+        },
+        {
+          levels: [
+            {
+              level: 0,
+              format: LevelFormat.DECIMAL_ZERO,
+              text: '[%1]',
+              alignment: AlignmentType.START,
+              style: {
+                paragraph: {
+                  indent: {
+                    left: convertInchesToTwip(0.5),
+                    hanging: convertInchesToTwip(0.18),
+                  },
+                },
+              },
+            },
+          ],
+          reference: 'padded-numbering-reference',
+        },
+      ],
+    },
     sections: [
       {
         properties: {
@@ -223,26 +322,36 @@ export const genDocument = (html: string, name = dayjs().format("YYYYMMDDHHmmss"
           default: new Footer({
             children: [
               new Paragraph({
-                text: "1",
-                style: "normalPara",
+                text: '1',
+                style: 'normalPara',
                 alignment: AlignmentType.RIGHT,
               }),
             ],
           }),
         },
-        children: childrenResult.map((child) => {
+        children: childrenResult.map((child, index) => {
           return new Paragraph({
+            // 有序列表
+            // numbering: {
+            //   reference: 'my-number-numbering-reference',
+            //   level: 0,
+            // },
+            // 无序列表
+            // bullet: {
+            //   level: 0
+            // },
             ...arr2ParagraphOptions(child.elements),
             children: child.elements.map((element: any) => {
               console.log(element);
               const { styles = [], name } = element;
               const styleObj = array2Style(styles);
-              if (name === "a") {
+              if (name === 'a') {
                 return new ExternalHyperlink({
                   children: [
                     new TextRun({
-                      text: (element.title as unknown as string) ?? element.text,
-                      style: "Hyperlink",
+                      text:
+                        (element.title as unknown as string) ?? element.text,
+                      style: 'Hyperlink',
                     }),
                   ],
                   link: element.href,
@@ -263,6 +372,6 @@ export const genDocument = (html: string, name = dayjs().format("YYYYMMDDHHmmss"
   Packer.toBlob(doc).then((blob) => {
     console.log(blob);
     saveAs(blob, `${name}.docx`);
-    console.log("Document created successfully");
+    console.log('Document created successfully');
   });
 };
