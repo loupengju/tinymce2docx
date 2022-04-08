@@ -35,6 +35,7 @@ export default function App() {
         onInit={(evt, editor) => (editorRef.current = editor)}
         initialValue=""
         init={{
+          placeholder: '请输入',
           height: 500,
           menubar: false,
           language: 'zh_CN',
