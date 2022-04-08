@@ -18,6 +18,8 @@ import {
   UnderlineType,
   convertInchesToTwip,
   LevelFormat,
+  ImageRun,
+  Media,
 } from 'docx';
 import { saveAs } from 'file-saver';
 
@@ -92,18 +94,47 @@ export const buildATag = (
   result.elements.push(elementInfo);
 };
 
+export const buildImage = (
+  child: DataNode & Element,
+  result: { elements: any[] },
+) => {
+  const elementInfo = {
+    type: ElementType.Tag,
+    // @ts-ignore
+    text: child.children[0]?.data,
+    attrs: genAttrs(child.attribs, []),
+    styles: genStyles(child.attribs, child, []),
+    ..._.pick(child, ['name']),
+  };
+
+  let _child = child as any;
+  while (_child.parent && _child.parent.type !== ElementType.Root) {
+    genAttrs(_child.parent?.attribs, elementInfo.attrs);
+    genStyles(_child.parent?.attribs, _child, elementInfo.styles);
+    _child = _child.parent;
+  }
+  result.elements.push(elementInfo);
+};
+
 // 递归所有node节点，找到text、a、image、table标签
 const walk = (child: DataNode & Element, result: { elements: any[] }) => {
   if (child.name === 'a') {
     // a标签
     buildATag(child, result);
-  } else if (child.type === ElementType.Text && child.name !== 'a') {
+  } else if (child.name === 'img') {
+    // image标签
+    buildImage(child, result);
+  } else if (child.type === ElementType.Text) {
     // 文本类型
     buildText(child, result);
   }
 
   // 递归
-  if (child.children && child.children.length && !['a'].includes(child.name)) {
+  if (
+    child.children &&
+    child.children.length &&
+    !['a', 'img'].includes(child.name)
+  ) {
     Array.from(child.children).forEach((i: any) => {
       walk(i, result);
     });
@@ -123,6 +154,11 @@ export const array2Style = (styles: string[]) => {
   });
 
   return info;
+};
+
+// array2Attr
+export const array2Attr = (attrs: string[]): any => {
+  return attrs.reduce((a, b) => Object.assign(a, b), {});
 };
 
 // style转格式 例如text-align、padding-left
@@ -228,6 +264,7 @@ export const genDocxStyle = (info: Record<string, string>): IRunOptions => {
  */
 export const genDocument = (
   html: string,
+  urlInfo: Record<string, ArrayBuffer>,
   name = dayjs().format('YYYYMMDDHHmmss'),
 ) => {
   const ast = parseDocument(html);
@@ -342,9 +379,9 @@ export const genDocument = (
             // },
             ...arr2ParagraphOptions(child.elements),
             children: child.elements.map((element: any) => {
-              console.log(element);
-              const { styles = [], name } = element;
+              const { styles = [], name, attrs } = element;
               const styleObj = array2Style(styles);
+              const attrObj = array2Attr(attrs);
               if (name === 'a') {
                 return new ExternalHyperlink({
                   children: [
@@ -355,6 +392,14 @@ export const genDocument = (
                     }),
                   ],
                   link: element.href,
+                });
+              } else if (name === 'img') {
+                return new ImageRun({
+                  data: urlInfo[attrObj['src']],
+                  transformation: {
+                    width: Number(attrObj.width),
+                    height: Number(attrObj.height),
+                  },
                 });
               } else {
                 return new TextRun({
