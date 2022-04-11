@@ -40,6 +40,7 @@ export default function App() {
           language: 'zh_CN',
           statusbar: false,
           convert_urls: false,
+          base_url: 'tinymce',
           urlconverter_callback: (url, node, on_save, name) => {
             urlToBuffer(url);
             return url;
