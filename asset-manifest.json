@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/static/css/main.35056703.css",
-    "main.js": "/static/js/main.3f2f6dd3.js",
-    "static/js/787.3d78e189.chunk.js": "/static/js/787.3d78e189.chunk.js",
-    "index.html": "/index.html",
-    "main.35056703.css.map": "/static/css/main.35056703.css.map",
-    "main.3f2f6dd3.js.map": "/static/js/main.3f2f6dd3.js.map",
-    "787.3d78e189.chunk.js.map": "/static/js/787.3d78e189.chunk.js.map"
+    "main.css": "/tinymce2docx/static/css/main.35056703.css",
+    "main.js": "/tinymce2docx/static/js/main.2ba49ee4.js",
+    "static/js/787.3d78e189.chunk.js": "/tinymce2docx/static/js/787.3d78e189.chunk.js",
+    "index.html": "/tinymce2docx/index.html",
+    "main.35056703.css.map": "/tinymce2docx/static/css/main.35056703.css.map",
+    "main.2ba49ee4.js.map": "/tinymce2docx/static/js/main.2ba49ee4.js.map",
+    "787.3d78e189.chunk.js.map": "/tinymce2docx/static/js/787.3d78e189.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.35056703.css",
-    "static/js/main.3f2f6dd3.js"
+    "static/js/main.2ba49ee4.js"
   ]
 }
