@@ -35,12 +35,13 @@ export default function App() {
         onInit={(evt, editor) => (editorRef.current = editor)}
         initialValue=""
         init={{
+          skin: false,
+          content_css: false,
           height: 500,
           menubar: false,
           language: 'zh_CN',
           statusbar: false,
           convert_urls: false,
-          base_url: 'tinymce',
           urlconverter_callback: (url, node, on_save, name) => {
             urlToBuffer(url);
             return url;
