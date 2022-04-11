@@ -207,11 +207,22 @@ export const arr2ParagraphOptions = (elements: any): IParagraphOptions => {
   };
 };
 
+const rgbToHex = (r: number, g: number, b: number) => {
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+};
+
 export const genDocxStyle = (info: Record<string, string>): IRunOptions => {
+  const [r, g, b] =
+    info['color'] && info['color'].includes('rgba')
+      ? info['color'].replace(/rgba\((.*)\)/, '$1').split(',')
+      : [];
   return {
     bold: info['font-weight'] === 'bold',
     italics: info['font-style'] === 'italic',
-    color: info['color'],
+    color:
+      info['color'] && info['color'].includes('rgba')
+        ? rgbToHex(Number(r), Number(g), Number(b))
+        : info['color'],
     size: info['font-size'] ? parseInt(info['font-size']) : DEFAULT_FONT_SIZE,
     shading: {
       fill: info['background-color'],
