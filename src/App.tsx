@@ -24,7 +24,6 @@ export default function App() {
     if (editorRef.current) {
       const html = editorRef.current.getContent();
       genDocument(html, urlRef.current);
-      // await exportHtmlToDocx(html, dayjs().format('YYYYMMDDHHmmss'));
     }
   };
 
