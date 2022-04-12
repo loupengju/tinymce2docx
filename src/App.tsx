@@ -13,7 +13,6 @@ export default function App() {
     xhr.responseType = 'arraybuffer';
     xhr.addEventListener('readystatechange', function (event) {
       if (xhr.status === 200 && xhr.readyState === 4) {
-        // 构造blob对象,具体看头部提供的链接地址
         urlRef.current[url] = xhr.response;
         console.log(urlRef.current);
       }
