@@ -8,7 +8,6 @@ export const DEFAULT_H2_FONT_SIZE = 36;
 export const DEFAULT_H1_FONT_SIZE = 40;
 
 // @refer https://github.com/byoungd/editor-to-word
-// style with tag
 export const D_TagStyleMap = {
   p: `line-height: ${DEFAULT_LINE_HEIGHT};`,
   strong: 'font-weight: bold;',
