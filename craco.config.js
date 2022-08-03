@@ -11,7 +11,7 @@ module.exports = {
   webpack: {
     configure: {
       output: {
-        publicPath: whenProd(() => '/tinymce2docx'),
+//         publicPath: whenProd(() => '/tinymce2docx'),
       },
     },
   },
