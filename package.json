@@ -1,7 +1,7 @@
 {
   "name": "tinymce-react-demo",
   "version": "0.1.0",
-  "homepage": "/tinymce2docx",
+  "homepage": ".",
   "private": true,
   "dependencies": {
     "@craco/craco": "^6.4.3",
